@@ -64,7 +64,7 @@ def create_app(test_config=None):
   ten questions per page and pagination at the bottom of the screen for three pages.
   Clicking on the page numbers should update the questions. 
   '''
-  @app.route('/', methods=['GET'])
+  @app.route('/questions', methods=['GET'])
   def get_questions():
     selections = Question.query.order_by(Question.id).all()
     total_questions = len(selections)
@@ -77,7 +77,7 @@ def create_app(test_config=None):
     return jsonify({
       'success': True,
       'questions': current_questions,
-      'totalQuestions': total_questions,
+      'total_questions': total_questions,
       'categories': {category.id: category.type for category in all_categories}
     })
 
@@ -103,10 +103,10 @@ def create_app(test_config=None):
         'success': True,
         'deleted': question_id,
         'questions': current_questions,
-        'totalQuestions': Question.query.count()
+        'total_questions': Question.query.count()
       })
     except:
-      abort(404)
+      abort(422)
   '''
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
@@ -119,6 +119,8 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['POST'])
   def create_questions():
     body = request.get_json()
+    if body == {}:
+      abort(422)
 
     new_question = body.get('question')
     new_answer = body.get('answer')
@@ -156,14 +158,16 @@ def create_app(test_config=None):
     searchTerm = body.get('searchTerm', None)
     try:
       if searchTerm:
-          selection = Question.query.order_by(Question.id).filter(Question.questions.ilike('%{}%'.format(searchTerm)))
+          selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(searchTerm))).all()
           current_questions = paginate_questions(request, selection)
 
           return jsonify({
             'success': True,
             'questions': current_questions,
-            'total_questions': len(selection.all())
+            'total_questions': len(selection)
           })
+      else:
+        abort(404)
     except:
       abort(404)
 
@@ -205,12 +209,15 @@ def create_app(test_config=None):
       body = request.get_json()
       # query questions in category and not a previous question
       # https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.ColumnOperators.not_in
-      questions = Question.query.filter(Question.category == body.get('quiz_category')).filter(Question.id.not_in(body.get('previous_questions'))).all()
+      category = body.get('quiz_category')
+      previous_questions = body.get('previous_questions')
+
+      questions = Question.query.filter(Question.category == category['id']).filter(Question.id.notin_(previous_questions)).all()
+      # checking end of question
       if len(questions) == 0:
         next_question = None
       else:
         next_question = random.choice(questions)
-        print(next_question)
 
       return jsonify({
         'success': True,
@@ -225,25 +232,33 @@ def create_app(test_config=None):
   @app.errorhandler(404)
   def not_found(error):
     return jsonify({
-      "success": False, 
-      "error": 404,
-      "message": "resource not found"
+      'success': False, 
+      'error': 404,
+      'message': 'resource not found'
       }), 404
 
   @app.errorhandler(422)
   def unprocessable(error):
     return jsonify({
-      "success": False, 
-      "error": 422,
-      "message": "unprocessable"
+      'success': False, 
+      'error': 422,
+      'message': 'unprocessable'
       }), 422
 
   @app.errorhandler(400)
   def bad_request(error):
     return jsonify({
-      "success": False, 
-      "error": 400,
-      "message": "bad request"
+      'success': False, 
+      'error': 400,
+      'message': 'bad request'
       }), 400
+
+  @app.errorhandler(500)
+  def internal_error(error):
+    return jsonify({
+      'success': False,
+      'error':500,
+      'message': 'internal server error'
+    }), 500
   
   return app

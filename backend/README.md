@@ -49,7 +49,7 @@ GET '/categories'
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Sample response `curl http://127.0.0.1:5000/categories`
 
-'''
+```
 {
   "categories": {
     "1": "Science", 
@@ -270,6 +270,7 @@ POST '/quizzes'
 
 ## Testing
 To run the tests, run
+
 ```
 dropdb trivia_test
 createdb trivia_test

@@ -37,11 +37,50 @@ To run the server, execute:
 ```
 export FLASK_APP=flaskr
 export FLASK_ENV=development
-DBURL="postgresql://<username>:<password>@localhost:5432/trivia" flask run --host 0.0.0.0
+export DB_HOST=127.0.0.1:5432
+export DB_USER=postgres
+export DB_PASSWORD=postgres
+export DB_NAME=trivia
+flask run --host 0.0.0.0
 ```
 
+## Testing
+To run the tests, run
+
+```
+dropdb trivia_test
+createdb trivia_test
+psql trivia_test < trivia.psql
+export DB_HOST=127.0.0.1:5432
+export DB_USER=postgres
+export DB_PASSWORD=postgres
+export DB_NAME=trivia_test
+python test_flaskr.py
+```
 
 ## API Reference
+
+### Getting Started
+
+Base URL: Currently this application is only hosted locally. The backend is hosted at http://127.0.0.1:5000/
+
+### Error Handling
+
+Errors are returned in the following json format:
+```
+{
+    "success": False,
+    "error": 404,
+    "message": "resource not found"
+}
+```
+
+The API returns 4 types of errors:
+
+- 400: bad request
+- 404: not found
+- 422: unprocessable
+- 500: internal server error
 
 ### Endpoints
 
@@ -268,14 +307,4 @@ POST '/quizzes'
   "question": "This a test questions", 
   "success": true
 }
-```
-
-## Testing
-To run the tests, run
-
-```
-dropdb trivia_test
-createdb trivia_test
-psql trivia_test < trivia.psql
-DBURL="postgresql://<username>:<password>@localhost:5432/trivia_test" python test_flaskr.py
 ```

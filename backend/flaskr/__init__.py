@@ -102,7 +102,6 @@ def create_app(test_config=None):
       return jsonify({
         'success': True,
         'deleted': question_id,
-        'questions': current_questions,
         'total_questions': Question.query.count()
       })
     except:
@@ -137,7 +136,6 @@ def create_app(test_config=None):
       return jsonify({
         'success': True,
         'created': question.id,
-        'questions': current_questions,
         'total_questions': Question.query.count()
       })
     except:

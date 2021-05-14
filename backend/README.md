@@ -263,7 +263,9 @@ POST '/quizzes'
 
 ```
 {
-  "question": "How many paintings did Van Gogh sell in his lifetime?", 
+  "answer": "Yes", 
+  "id": 25, 
+  "question": "This a test questions", 
   "success": true
 }
 ```

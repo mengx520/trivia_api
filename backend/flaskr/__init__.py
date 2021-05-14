@@ -163,11 +163,10 @@ def create_app(test_config=None):
             if searchTerm:
                 selection = Question.query.order_by(Question.id).filter(
                     Question.question.ilike('%{}%'.format(searchTerm))).all()
-                current_questions = paginate_questions(request, selection)
 
                 return jsonify({
                     'success': True,
-                    'questions': current_questions,
+                    'questions': [ q.format() for q in selection ],
                     'total_questions': len(selection)
                 })
             else:
@@ -221,14 +220,20 @@ def create_app(test_config=None):
                 Question.id.notin_(previous_questions)).all()
             # checking end of question
             if len(questions) == 0:
-                next_question = None
+                return jsonify({
+                  'success': True,
+                  'question': None,
+                  'answer': None,
+                  'id': None
+                })
             else:
                 next_question = random.choice(questions)
-
-            return jsonify({
-                'success': True,
-                'question': next_question.question
-            })
+                return jsonify({
+                    'success': True,
+                    'question': next_question.question,
+                    'answer': next_question.answer,
+                    'id': next_question.id
+                })
         except:
             abort(422)
 
